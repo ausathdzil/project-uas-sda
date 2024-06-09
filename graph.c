@@ -1,14 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define NUM_STATIONS 5
+#include <stdbool.h>
+#define NUM_STATIONS 10
 
 typedef enum Stations {
-  Akihabara,
-  Ueno,
-  Tokyo,
-  Shinjuku,
-  Ikebukuro
+  Bogor,
+  Manggarai,
+  Depok,
+  Tebet,
+  LA,
+  PM,
+  Citayam,
+  Cawang,
+  TB,
+  PC,
 } Stations;
+
+typedef struct Queue {
+  int items[NUM_STATIONS];
+  int front;
+  int rear;
+} Queue;
 
 typedef struct Node {
   int vertex;
@@ -18,6 +30,7 @@ typedef struct Node {
 typedef struct Graph {
   int num_vertices;
   Node **adj_lists;
+  int* visited;
 } Graph;
 
 Node *create_node(int vertex) {
@@ -46,8 +59,15 @@ Graph *create_graph(int vertices) {
     exit(1);
   }
 
+  graph->visited = (int *)malloc(vertices * sizeof(int));
+  if (graph->visited == NULL) {
+    printf("Memory error\n");
+    exit(1);
+  }
+
   for (int i = 0; i < vertices; i++) {
     graph->adj_lists[i] = NULL;
+    graph->visited[i] = 0;
   }
 
   return graph;
@@ -90,6 +110,93 @@ void print_graph(Graph *graph) {
   }
 }
 
+Queue* create_queue() {
+  Queue* queue = (Queue*)malloc(sizeof(Queue));
+  if (queue == NULL) {
+    printf("Memory error\n");
+    exit(1);
+  }
+
+  queue->front = -1;
+  queue->rear = -1;
+
+  return queue;
+}
+
+bool is_empty(Queue* queue) {
+  return queue->rear == -1;
+}
+
+void enqueue(Queue *queue, int value) {
+  if (queue->rear == NUM_STATIONS - 1) {
+    printf("\nqueue full.");
+  } else {
+    if (queue->front == -1) {
+      queue->front = 0;
+    }
+    queue->rear++;
+    queue->items[queue->rear] = value;
+  }
+}
+
+int dequeue(Queue* queue) {
+  int item;
+
+  if (is_empty(queue)) {
+    printf("queue empty.");
+    item = -1;
+  } else {
+    item = queue->items[queue->front];
+    queue->front++;
+
+    if (queue->front > queue->rear) {
+      printf("\nResetting queue\n");
+      queue->front = queue->rear = -1;
+    }
+  }
+
+  return item;
+}
+
+void print_queue(Queue *queue) {
+  if (is_empty(queue)) {
+    printf("queue empty.");
+  } else {
+    printf("\nqueue: \n");
+    for (int i = queue->front; i < queue->rear + 1; i++) {
+      printf("%d ", queue->items[i]);
+    }
+    printf("\n");
+  }
+}
+
+void bfs_algo(Graph* graph, int start_vertex) {
+  Queue* queue = create_queue();
+
+  graph->visited[start_vertex] = 1;
+  enqueue(queue, start_vertex);
+
+  while (!is_empty(queue)) {
+    int current_vertex = dequeue(queue);
+    printf("\nVisited %d\n", current_vertex);
+    
+    Node* temp = graph->adj_lists[current_vertex];
+
+    while (temp) {
+      int adj_vertex = temp->vertex;
+
+      if (graph->visited[adj_vertex] == 0) {
+        graph->visited[adj_vertex] = 1;
+        enqueue(queue, adj_vertex);
+      }
+
+      temp = temp->next;
+    }
+  }
+
+  free(queue);
+}
+
 void free_graph(Graph *graph) {
   for (int i = 0; i < graph->num_vertices; i++) {
     Node *temp = graph->adj_lists[i];
@@ -100,20 +207,50 @@ void free_graph(Graph *graph) {
     }
   }
   free(graph->adj_lists);
+  free(graph->visited);
   free(graph);
 }
 
 int main() {
   Graph *graph = create_graph(NUM_STATIONS);
-  Stations stations[NUM_STATIONS] = {Akihabara, Ueno, Tokyo, Shinjuku, Ikebukuro};
+  Stations stations[NUM_STATIONS] = {Bogor, Manggarai, Depok, Tebet, LA, PM, Citayam, Cawang, TB, PC};
 
-  add_edge(graph, stations[0], stations[1]);
-  add_edge(graph, stations[0], stations[2]);
-  add_edge(graph, stations[1], stations[2]);
-  add_edge(graph, stations[2], stations[4]);
-  add_edge(graph, stations[3], stations[4]);
+  // rute st bogor
+  add_edge(graph, stations[0], stations[2]); // bogor <-> depok
+  add_edge(graph, stations[0], stations[5]); // bogor <-> PM
+  add_edge(graph, stations[0], stations[7]); // bogot <-> cawang
 
-  print_graph(graph);
+  // rute st manggarai
+  add_edge(graph, stations[1], stations[3]); // manggarai <-> tebet
+  add_edge(graph, stations[1], stations[6]); // manggarai <-> citayam
+  add_edge(graph, stations[1], stations[9]); // manggarai <-> PC
+
+  // rute st depok
+  add_edge(graph, stations[2], stations[8]); // depok <-> TB
+  add_edge(graph, stations[2], stations[9]); // depok <-> PC
+
+  // rute st tebet
+  add_edge(graph, stations[3], stations[2]); // tebet <-> depok
+  add_edge(graph, stations[3], stations[5]); // tebet <-> PM
+  add_edge(graph, stations[3], stations[7]); // tebet <-> cawang
+  add_edge(graph, stations[3], stations[9]); // tebet <-> PC
+
+  // rute st LA
+  add_edge(graph, stations[4], stations[1]); // LA <-> manggarai
+  add_edge(graph, stations[4], stations[6]); // LA <-> citayam
+  
+  // rute st PM
+  add_edge(graph, stations[5], stations[1]); // PM <-> manggarai
+  add_edge(graph, stations[5], stations[8]); // PM <-> TB
+  
+  // rute st Cawang
+  add_edge(graph, stations[7], stations[1]); // cawan <-> manggarai
+  add_edge(graph, stations[7], stations[9]); // cawan <-> PC
+  
+  // rute st TB
+  add_edge(graph, stations[8], stations[4]); // TB <-> LA
+  
+  bfs_algo(graph, stations[0]);
   free_graph(graph);
 
   return 0;
