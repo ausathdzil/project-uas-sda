@@ -1,5 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#define NUM_STATIONS 5
+
+typedef enum Stations {
+  Akihabara,
+  Ueno,
+  Tokyo,
+  Shinjuku,
+  Ikebukuro
+} Stations;
 
 typedef struct Node {
   int vertex;
@@ -45,27 +54,36 @@ Graph *create_graph(int vertices) {
 }
 
 void add_edge(Graph *graph, int source, int destination) {
-  if (source >= graph->num_vertices || destination >= graph->num_vertices) {
-    printf("Vertex does not exist\n");
-    return;
+  Node *new_node = create_node(destination);
+  if (graph->adj_lists[source] == NULL) {
+    graph->adj_lists[source] = new_node;
+  } else {
+    Node *temp = graph->adj_lists[source];
+    while (temp->next != NULL) {
+      temp = temp->next;
+    }
+    temp->next = new_node;
   }
 
-  Node *new_node = create_node(destination);
-  new_node->next = graph->adj_lists[source];
-  graph->adj_lists[source] = new_node;
-
   new_node = create_node(source);
-  new_node->next = graph->adj_lists[destination];
-  graph->adj_lists[destination] = new_node;
+  if (graph->adj_lists[destination] == NULL) {
+    graph->adj_lists[destination] = new_node;
+  } else {
+    Node *temp = graph->adj_lists[destination];
+    while (temp->next != NULL) {
+      temp = temp->next;
+    }
+    temp->next = new_node;
+  }
 }
 
 void print_graph(Graph *graph) {
-  printf("\nAdjacency list\n");
+  printf("\nadjacency list\n");
   for (int vertex = 0; vertex < graph->num_vertices; vertex++) {
     Node *temp = graph->adj_lists[vertex];
-    printf("vertex %d: ", vertex);
+    printf("station %d -> ", vertex);
     while (temp) {
-      printf("%d -> ", temp->vertex);
+      printf("%d --> ", temp->vertex);
       temp = temp->next;
     }
     printf("NULL\n");
@@ -86,13 +104,12 @@ void free_graph(Graph *graph) {
 }
 
 int main() {
-  Graph *graph = create_graph(5);
-  int stations[5] = {0, 1, 2, 3, 4};
-  
+  Graph *graph = create_graph(NUM_STATIONS);
+  Stations stations[NUM_STATIONS] = {Akihabara, Ueno, Tokyo, Shinjuku, Ikebukuro};
+
   add_edge(graph, stations[0], stations[1]);
   add_edge(graph, stations[0], stations[2]);
   add_edge(graph, stations[1], stations[2]);
-  add_edge(graph, stations[1], stations[3]);
   add_edge(graph, stations[2], stations[4]);
   add_edge(graph, stations[3], stations[4]);
 
