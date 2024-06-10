@@ -191,8 +191,8 @@ void bfs_algo(Graph* graph, int start_vertex, int end_vertex) {
       int path[NUM_STATIONS];
       int path_length = 0;
 
-      for (int v = end_vertex; v != -1; v = graph->parent[v]) {
-        path[path_length++] = v;
+      for (int vertex = end_vertex; vertex != -1; vertex = graph->parent[vertex]) {
+        path[path_length++] = vertex;
       }
 
       for (int i = path_length - 1; i >= 0; i--) {
@@ -240,6 +240,7 @@ void free_graph(Graph *graph) {
 
   free(graph->adj_lists);
   free(graph->visited);
+  free(graph->parent);
   free(graph);
 }
 
