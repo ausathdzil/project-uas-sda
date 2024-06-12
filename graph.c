@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #define NUM_STATIONS 10
 
 typedef enum Stations {
@@ -15,6 +16,19 @@ typedef enum Stations {
   TB,
   PC,
 } Stations;
+
+const char *station_names[NUM_STATIONS] = {
+  "Bogor",
+  "Manggarai",
+  "Depok",
+  "Tebet",
+  "Lenteng Agung",
+  "Pasar Minggu",
+  "Citayam",
+  "Cawang",
+  "Tanjung Barat",
+  "Pondok Cina"
+};
 
 typedef struct Node {
   int vertex;
@@ -31,7 +45,7 @@ typedef struct Graph {
 Node *create_node(int vertex) {
   Node *new_node = (Node *)malloc(sizeof(Node));
   if (new_node == NULL) {
-    printf("memory error\n");
+    printf("Memory error\n");
     exit(1);
   }
   new_node->vertex = vertex;
@@ -43,26 +57,26 @@ Node *create_node(int vertex) {
 Graph *create_graph(int vertices) {
   Graph *graph = (Graph *)malloc(sizeof(Graph));
   if (graph == NULL) {
-    printf("memory error\n");
+    printf("Memory error\n");
     exit(1);
   }
 
   graph->num_vertices = vertices;
   graph->adj_lists = (Node **)malloc(vertices * sizeof(Node *));
   if (graph->adj_lists == NULL) {
-    printf("memory error\n");
+    printf("Memory error\n");
     exit(1);
   }
 
   graph->visited = (int *)malloc(vertices * sizeof(int));
   if (graph->visited == NULL) {
-    printf("memory error\n");
+    printf("Memory error\n");
     exit(1);
   }
 
   graph->parent = (int *)malloc(vertices * sizeof(int));
   if (graph->parent == NULL) {
-    printf("memory error\n");
+    printf("Memory error\n");
     exit(1);
   }
 
@@ -99,19 +113,6 @@ void add_edge(Graph *graph, int source, int destination) {
   }
 }
 
-void print_graph(Graph *graph) {
-  printf("\nadjacency list\n");
-  for (int vertex = 0; vertex < graph->num_vertices; vertex++) {
-    Node *temp = graph->adj_lists[vertex];
-    printf("station %d -> ", vertex);
-    while (temp) {
-      printf("%d --> ", temp->vertex);
-      temp = temp->next;
-    }
-    printf("NULL\n");
-  }
-}
-
 typedef struct Queue {
   int items[NUM_STATIONS];
   int front;
@@ -121,7 +122,7 @@ typedef struct Queue {
 Queue* create_queue() {
   Queue* queue = (Queue*)malloc(sizeof(Queue));
   if (queue == NULL) {
-    printf("memory error\n");
+    printf("Memory error\n");
     exit(1);
   }
   queue->front = -1;
@@ -136,7 +137,7 @@ bool is_empty(Queue* queue) {
 
 void enqueue(Queue *queue, int value) {
   if (queue->rear == NUM_STATIONS - 1) {
-    printf("\nqueue full.");
+    printf("\nQueue full.");
   } else {
     if (queue->front == -1) {
       queue->front = 0;
@@ -150,7 +151,7 @@ int dequeue(Queue* queue) {
   int item;
 
   if (is_empty(queue)) {
-    printf("queue empty.");
+    printf("Queue empty.");
     item = -1;
   } else {
     item = queue->items[queue->front];
@@ -164,18 +165,6 @@ int dequeue(Queue* queue) {
   return item;
 }
 
-void print_queue(Queue *queue) {
-  if (is_empty(queue)) {
-    printf("queue empty.");
-  } else {
-    printf("queue: ");
-    for (int i = queue->front; i < queue->rear + 1; i++) {
-      printf("%d ", queue->items[i]);
-    }
-    printf("\n");
-  }
-}
-
 void bfs_algo(Graph* graph, int start_vertex, int end_vertex) {
   Queue* queue = create_queue();
 
@@ -185,32 +174,7 @@ void bfs_algo(Graph* graph, int start_vertex, int end_vertex) {
   while (!is_empty(queue)) {
     int current_vertex = dequeue(queue);
 
-    if (current_vertex == end_vertex) {
-      printf("\nshortest path from %d to %d: ", start_vertex, end_vertex);
-
-      int path[NUM_STATIONS];
-      int path_length = 0;
-
-      for (int vertex = end_vertex; vertex != -1; vertex = graph->parent[vertex]) {
-        path[path_length++] = vertex;
-      }
-
-      for (int i = path_length - 1; i >= 0; i--) {
-        if (i == 0) {
-          printf("%d", path[i]);
-          break;
-        }
-        printf("%d - ", path[i]);
-      }
-      printf("\n");
-      
-      free(queue);
-
-      return;
-    }
-    
     Node* temp = graph->adj_lists[current_vertex];
-
     while (temp) {
       int adj_vertex = temp->vertex;
 
@@ -218,14 +182,43 @@ void bfs_algo(Graph* graph, int start_vertex, int end_vertex) {
         graph->visited[adj_vertex] = 1;
         graph->parent[adj_vertex] = current_vertex;
         enqueue(queue, adj_vertex);
-      }
 
+        if (adj_vertex == end_vertex) {
+          printf("\nShortest path from %s to %s: ", station_names[start_vertex], station_names[end_vertex]);
+
+          int path[NUM_STATIONS];
+          int path_length = 0;
+
+          for (int vertex = end_vertex; vertex != -1; vertex = graph->parent[vertex]) {
+            path[path_length++] = vertex;
+          }
+
+          for (int i = path_length - 1; i >= 0; i--) {
+            if (i == 0) {
+              printf("%s", station_names[path[i]]);
+              break;
+            }
+            printf("%s - ", station_names[path[i]]);
+          }
+          printf("\nNumber of stations traversed: %d\n", path_length - 1);
+
+          free(queue);
+          return;
+        }
+      }
       temp = temp->next;
     }
   }
 
-  printf("no path found from %d to %d\n", start_vertex, end_vertex);
+  printf("no path found from %s to %s\n", station_names[start_vertex], station_names[end_vertex]);
   free(queue);
+}
+
+void reset_visited(Graph *graph) {
+  for (int i = 0; i < graph->num_vertices; i++) {
+    graph->visited[i] = 0;
+    graph->parent[i] = -1;
+  }
 }
 
 void free_graph(Graph *graph) {
@@ -244,37 +237,90 @@ void free_graph(Graph *graph) {
   free(graph);
 }
 
+int get_station_index(const char *name) {
+  for (int i = 0; i < NUM_STATIONS; i++) {
+    if (strcmp(station_names[i], name) == 0) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+void display_stations(Graph *graph) {
+  printf("\nStations route:\n");
+  for (int vertex = 0; vertex < graph->num_vertices; vertex++) {
+    Node *temp = graph->adj_lists[vertex];
+    printf("%2d. %s -> ", vertex + 1, station_names[vertex]);
+    while (temp) {
+      if (temp->next == NULL) {
+        printf("%s", station_names[temp->vertex]);
+        break;
+      }
+      printf("%s --> ", station_names[temp->vertex]);
+      temp = temp->next;
+    }
+    printf("\n");
+  }
+}
+
 int main() {
   Graph *graph = create_graph(NUM_STATIONS);
-  Stations stations[NUM_STATIONS] = {Bogor, Manggarai, Depok, Tebet, LA, PM, Citayam, Cawang, TB, PC};
 
-  add_edge(graph, stations[Bogor], stations[Depok]);
-  add_edge(graph, stations[Bogor], stations[PM]);
-  add_edge(graph, stations[Bogor], stations[Cawang]);
+  add_edge(graph, Bogor, Depok);
+  add_edge(graph, Bogor, PM);
+  add_edge(graph, Bogor, Cawang);
 
-  add_edge(graph, stations[Manggarai], stations[Tebet]);
-  add_edge(graph, stations[Manggarai], stations[Citayam]);
-  add_edge(graph, stations[Manggarai], stations[PC]);
+  add_edge(graph, Manggarai, Tebet);
+  add_edge(graph, Manggarai, Citayam);
+  add_edge(graph, Manggarai, PC);
 
-  add_edge(graph, stations[Depok], stations[TB]);
-  add_edge(graph, stations[Depok], stations[PC]);
+  add_edge(graph, Depok, TB);
+  add_edge(graph, Depok, PC);
 
-  add_edge(graph, stations[Tebet], stations[Depok]);
-  add_edge(graph, stations[Tebet], stations[PM]);
-  add_edge(graph, stations[Tebet], stations[Cawang]);
-  add_edge(graph, stations[Tebet], stations[PC]);
+  add_edge(graph, Tebet, Depok);
+  add_edge(graph, Tebet, PM);
+  add_edge(graph, Tebet, Cawang);
+  add_edge(graph, Tebet, PC);
 
-  add_edge(graph, stations[LA], stations[Manggarai]);
-  add_edge(graph, stations[LA], stations[Citayam]);
-  
-  add_edge(graph, stations[PM], stations[Manggarai]);
-  add_edge(graph, stations[PM], stations[TB]);
-  add_edge(graph, stations[Cawang], stations[Manggarai]);
-  add_edge(graph, stations[Cawang], stations[PC]);
-  add_edge(graph, stations[TB], stations[LA]);
-  
-  print_graph(graph);
-  bfs_algo(graph, stations[Depok], stations[LA]);
+  add_edge(graph, LA, Manggarai);
+  add_edge(graph, LA, Citayam);
+
+  add_edge(graph, PM, Manggarai);
+  add_edge(graph, PM, TB);
+  add_edge(graph, Cawang, Manggarai);
+  add_edge(graph, Cawang, PC);
+  add_edge(graph, TB, LA);
+
+  int choice;
+  do {
+    display_stations(graph);
+
+    char start_station[50], end_station[50];
+    
+    printf("\nEnter the start station: ");
+    scanf(" %[^\n]s", start_station);
+    printf("\nEnter the end station: ");
+    scanf(" %[^\n]s", end_station);
+
+    int start_vertex = get_station_index(start_station);
+    int end_vertex = get_station_index(end_station);
+
+    if (start_vertex == -1 || end_vertex == -1) {
+      printf("Invalid station name entered.\n");
+    } else if (start_vertex == end_vertex) {
+      printf("Start and end stations are the same. No need to traverse.\n");
+    } else {
+      bfs_algo(graph, start_vertex, end_vertex);
+    }
+
+    printf("\n1. Find another route\n");
+    printf("2. Exit\n");
+    printf("\nEnter your choice: ");
+    scanf("%d", &choice);
+
+    reset_visited(graph);
+  } while (choice != 2);
+
   free_graph(graph);
 
   return 0;
