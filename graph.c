@@ -63,23 +63,13 @@ Graph *create_graph(int vertices) {
 
   graph->num_vertices = vertices;
   graph->adj_lists = (Node **)malloc(vertices * sizeof(Node *));
-  if (graph->adj_lists == NULL) {
-    printf("Memory error\n");
-    exit(1);
-  }
-
   graph->visited = (int *)malloc(vertices * sizeof(int));
-  if (graph->visited == NULL) {
-    printf("Memory error\n");
-    exit(1);
-  }
-
   graph->parent = (int *)malloc(vertices * sizeof(int));
-  if (graph->parent == NULL) {
+  if (graph->adj_lists == NULL || graph->visited == NULL || graph->parent == NULL) { 
     printf("Memory error\n");
     exit(1);
   }
-
+ 
   for (int i = 0; i < vertices; i++) {
     graph->adj_lists[i] = NULL;
     graph->visited[i] = 0;
@@ -210,7 +200,7 @@ void bfs_algo(Graph* graph, int start_vertex, int end_vertex) {
     }
   }
 
-  printf("no path found from %s to %s\n", station_names[start_vertex], station_names[end_vertex]);
+  printf("No path found from %s to %s\n", station_names[start_vertex], station_names[end_vertex]);
   free(queue);
 }
 
@@ -329,6 +319,7 @@ int main() {
   add_edge(graph, Cawang, PC);
   add_edge(graph, TB, LA);
 
+  printf("\nStation route finder\n");
   display_stations();
 
   int choice;
