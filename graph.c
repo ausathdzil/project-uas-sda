@@ -246,8 +246,8 @@ int get_station_index(const char *name) {
   return -1;
 }
 
-void display_stations(Graph *graph) {
-  printf("\nStations route:\n");
+void display_routes(Graph *graph) {
+  printf("\nStations adjacency list:\n");
   for (int vertex = 0; vertex < graph->num_vertices; vertex++) {
     Node *temp = graph->adj_lists[vertex];
     printf("%2d. %s -> ", vertex + 1, station_names[vertex]);
@@ -261,6 +261,44 @@ void display_stations(Graph *graph) {
     }
     printf("\n");
   }
+}
+
+void display_stations() {
+  printf("\nAvailable stations:\n");
+  for (int i = 0; i < NUM_STATIONS; i++) {
+    printf("%2d. %s\n", i + 1, station_names[i]);
+  }
+}
+
+void find_routes(Graph *graph) {
+  int choice;
+  do {
+    display_stations();
+
+    char start_station[50], end_station[50];
+    printf("\nEnter the start station: ");
+    scanf(" %[^\n]s", start_station);
+    printf("\nEnter the end station: ");
+    scanf(" %[^\n]s", end_station);
+
+    int start_vertex = get_station_index(start_station);
+    int end_vertex = get_station_index(end_station);
+
+    if (start_vertex == -1 || end_vertex == -1) {
+      printf("Invalid station name entered.\n");
+    } else if (start_vertex == end_vertex) {
+      printf("Start and end stations are the same. No need to traverse.\n");
+    } else {
+      bfs_algo(graph, start_vertex, end_vertex);
+    }
+
+    printf("\n1. Find another route\n");
+    printf("2. Back to menu\n");
+    printf("\nEnter your choice: ");
+    scanf("%d", &choice);
+
+    reset_visited(graph);
+  } while (choice != 2);
 }
 
 int main() {
@@ -291,35 +329,35 @@ int main() {
   add_edge(graph, Cawang, PC);
   add_edge(graph, TB, LA);
 
+  display_stations();
+
   int choice;
   do {
-    display_stations(graph);
-
-    char start_station[50], end_station[50];
-    
-    printf("\nEnter the start station: ");
-    scanf(" %[^\n]s", start_station);
-    printf("\nEnter the end station: ");
-    scanf(" %[^\n]s", end_station);
-
-    int start_vertex = get_station_index(start_station);
-    int end_vertex = get_station_index(end_station);
-
-    if (start_vertex == -1 || end_vertex == -1) {
-      printf("Invalid station name entered.\n");
-    } else if (start_vertex == end_vertex) {
-      printf("Start and end stations are the same. No need to traverse.\n");
-    } else {
-      bfs_algo(graph, start_vertex, end_vertex);
-    }
-
-    printf("\n1. Find another route\n");
-    printf("2. Exit\n");
+    printf("\n1. Display routes\n");
+    printf("2. Find route\n");
+    printf("3. Exit\n");
     printf("\nEnter your choice: ");
     scanf("%d", &choice);
 
-    reset_visited(graph);
-  } while (choice != 2);
+    switch (choice)
+    {
+    case 1:
+      display_routes(graph);
+      break;
+    
+    case 2:
+      find_routes(graph);
+      break;
+
+    case 3:
+      break;
+
+    default:
+      printf("Invalid choice\n");
+      break;
+    }
+
+  } while (choice != 3);
 
   free_graph(graph);
 
