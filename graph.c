@@ -38,8 +38,8 @@ typedef struct Node {
 typedef struct Graph {
   int num_vertices;
   Node **adj_lists;
-  int* visited;
-  int* parent;
+  int *visited;
+  int *parent;
 } Graph;
 
 Node *create_node(int vertex) {
