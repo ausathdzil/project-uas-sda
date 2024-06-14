@@ -330,23 +330,22 @@ int main() {
     printf("\nEnter your choice: ");
     scanf("%d", &choice);
 
-    switch (choice)
-    {
-    case 1:
-      display_routes(graph);
-      break;
-    
-    case 2:
-      find_routes(graph);
-      break;
+    switch (choice) {
+      case 1:
+        display_routes(graph);
+        break;
+      
+      case 2:
+        find_routes(graph);
+        break;
 
-    case 3:
-      break;
+      case 3:
+        break;
 
-    default:
-      printf("Invalid choice\n");
-      break;
-    }
+      default:
+        printf("Invalid choice\n");
+        break;
+      }
 
   } while (choice != 3);
 
