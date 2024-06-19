@@ -109,8 +109,8 @@ typedef struct Queue {
   int rear;
 } Queue;
 
-Queue* create_queue() {
-  Queue* queue = (Queue*)malloc(sizeof(Queue));
+Queue *create_queue() {
+  Queue *queue = (Queue *)malloc(sizeof(Queue));
   if (queue == NULL) {
     printf("Memory error\n");
     exit(1);
@@ -121,7 +121,7 @@ Queue* create_queue() {
   return queue;
 }
 
-bool is_empty(Queue* queue) {
+bool is_empty(Queue *queue) {
   return queue->rear == -1;
 }
 
@@ -137,7 +137,7 @@ void enqueue(Queue *queue, int value) {
   }
 }
 
-int dequeue(Queue* queue) {
+int dequeue(Queue *queue) {
   int item;
 
   if (is_empty(queue)) {
@@ -155,8 +155,8 @@ int dequeue(Queue* queue) {
   return item;
 }
 
-void bfs_algo(Graph* graph, int start_vertex, int end_vertex) {
-  Queue* queue = create_queue();
+void bfs_algo(Graph *graph, int start_vertex, int end_vertex) {
+  Queue *queue = create_queue();
 
   graph->visited[start_vertex] = 1;
   enqueue(queue, start_vertex);
@@ -164,7 +164,7 @@ void bfs_algo(Graph* graph, int start_vertex, int end_vertex) {
   while (!is_empty(queue)) {
     int current_vertex = dequeue(queue);
 
-    Node* temp = graph->adj_lists[current_vertex];
+    Node *temp = graph->adj_lists[current_vertex];
     while (temp) {
       int adj_vertex = temp->vertex;
 
